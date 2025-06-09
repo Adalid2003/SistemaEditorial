@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Nueva Obra</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #1f1f2f, #12121c);
+            min-height: 100vh;
+            margin: 0;
+            padding: 2rem;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: #fff;
+        }
+
+        .form-container {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 2rem 3rem;
+            box-shadow: 0 0 20px rgba(255, 255, 255, 0.1);
+            max-width: 600px;
+            width: 100%;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 1.5rem;
+            color: #66ffb3;
+        }
+
+        label {
+            display: block;
+            margin: 0.8rem 0 0.3rem;
+            font-weight: bold;
+            color: #ccc;
+        }
+
+        input,
+        select {
+            width: 100%;
+            padding: 0.7rem;
+            border: none;
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            margin-bottom: 1rem;
+        }
+
+        input::file-selector-button {
+            background: #007bff;
+            color: white;
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .btn-submit {
+            width: 100%;
+            padding: 0.9rem;
+            font-size: 1rem;
+            background-color: #00aaff;
+            border: none;
+            border-radius: 10px;
+            color: white;
+            cursor: pointer;
+            margin-top: 1rem;
+            transition: background-color 0.3s;
+        }
+
+        .btn-submit:hover {
+            background-color: #0077cc;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="form-container">
+        <h1>Registrar nueva obra</h1>
+        <form action="/solicitar-estimacion/" method="post" enctype="multipart/form-data">
+            <!-- CSRF token para Django si lo usas -->
+            <!-- {% csrf_token %} -->
+
+            <label for="titulo">Título</label>
+            <input type="text" id="titulo" name="titulo" required>
+
+            <label for="paginas">Cantidad de páginas</label>
+            <input type="number" id="paginas" name="paginas" required min="1">
+
+            <label for="papel">Tipo de papel</label>
+            <select id="papel" name="papel" required>
+                <option value="Bond">Bond</option>
+                <option value="Reciclado">Reciclado</option>
+                <option value="Couche">Couché</option>
+            </select>
+
+            <label for="tapa">Tipo de tapa</label>
+            <select id="tapa" name="tapa" required>
+                <option value="Blanda">Blanda</option>
+                <option value="Dura">Dura</option>
+            </select>
+
+            <label for="portada">Portada del libro (imagen)</label>
+            <input type="file" id="portada" name="portada" accept="image/*" required>
+
+            <button type="submit" class="btn-submit">Solicitar estimación</button>
+        </form>
+    </div>
+
+</body>
+
+</html>
