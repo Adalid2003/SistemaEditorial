@@ -2,6 +2,7 @@ from django.shortcuts import render, redirect
 from django.contrib.auth.hashers import check_password, make_password
 from django.core.exceptions import ValidationError
 from django.core.validators import validate_email
+from django.contrib.auth.decorators import login_required
 from core.models import Cliente, Empleado, CostoEstimacion, Material, Maquinaria, TipoMaquinaria
 
 def login(request):
@@ -81,12 +82,15 @@ def soli_estimacion(request):
 def nueva_obra(request):
     return render(request, 'nueva_obra.html', {})
 
+@login_required
 def estimaciones_cliente(request):
-    # Filtrar estimaciones según el cliente autenticado
-    cliente = request.user.cliente  # Suponiendo que el cliente está autenticado
-    estimaciones = CostoEstimacion.objects.filter(id_obra__id_cliente=cliente)
-
-    return render(request, 'estimaciones_cliente.html', {'estimaciones': estimaciones})
+    # Verificar que el usuario autenticado sea un cliente
+    try:
+        cliente = request.user.cliente  # Esto asume que el usuario tiene un atributo relacionado con Cliente
+        estimaciones = CostoEstimacion.objects.filter(id_obra__id_cliente=cliente)
+        return render(request, 'estimaciones_cliente.html', {'estimaciones': estimaciones})
+    except AttributeError:
+        return render(request, 'login.html', {'error': 'Debes iniciar sesión como cliente para acceder a esta página.'})
 
 def logout(request):
     # Eliminar la sesión del usuario
