@@ -1,6 +1,6 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth.hashers import check_password
-from .models import Cliente, Empleado
+from core.models import Cliente, Empleado, CostoEstimacion, Material, Maquinaria, TipoMaquinaria
 
 def login(request):
     if request.method == 'POST':
@@ -14,7 +14,7 @@ def login(request):
                 # Guardar sesión del cliente
                 request.session['usuario_tipo'] = 'cliente'
                 request.session['usuario_id'] = cliente.id_cliente
-                return redirect('estimaciones_cliente')  # Redirigir a estimaciones del cliente
+                return redirect('estimaciones_cliente/')  # Redirigir a estimaciones del cliente
         except Cliente.DoesNotExist:
             pass
 
@@ -30,7 +30,7 @@ def login(request):
             pass
 
         # Si no se encuentra el usuario
-        return render(request, 'login.html', {'error': 'Correo o contraseña incorrectos'})
+        return render(request, 'login.html', {'error': True})
 
     return render(request, 'login.html', {})
 
@@ -42,3 +42,10 @@ def soli_estimacion(request):
 
 def nueva_obra(request):
     return render(request, 'nueva_obra.html', {})
+
+def estimaciones_cliente(request):
+    # Filtrar estimaciones según el cliente autenticado
+    cliente = request.user.cliente  # Suponiendo que el cliente está autenticado
+    estimaciones = CostoEstimacion.objects.filter(id_obra__id_cliente=cliente)
+
+    return render(request, 'estimaciones_cliente.html', {'estimaciones': estimaciones})

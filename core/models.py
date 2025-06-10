@@ -112,3 +112,4 @@ class CostoEstimacion(models.Model):
 
     def __str__(self):
         return f"Estimación {self.id_costoEstimacion} - Obra {self.id_obra}"
+# Create your models here.
