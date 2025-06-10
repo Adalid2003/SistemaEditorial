@@ -87,3 +87,8 @@ def estimaciones_cliente(request):
     estimaciones = CostoEstimacion.objects.filter(id_obra__id_cliente=cliente)
 
     return render(request, 'estimaciones_cliente.html', {'estimaciones': estimaciones})
+
+def logout(request):
+    # Eliminar la sesión del usuario
+    request.session.flush()
+    return redirect('login')  # Redirigir al login después de cerrar sesión

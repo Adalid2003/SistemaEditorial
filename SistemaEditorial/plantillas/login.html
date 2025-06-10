@@ -35,7 +35,7 @@
                         <a class="nav-link text-light" href="{% url 'estimaciones_cliente' %}">Estimaciones</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link text-light">Cerrar Sesión</a>
+                        <a class="nav-link text-light" href="#" onclick="confirmLogout()">Cerrar Sesión</a>
                     </li>
                     {% else %}
                     <!-- Opciones para usuarios no logueados -->
@@ -88,14 +88,32 @@
     </script>
     {% endif %}
     {% if error %}
-<script>
-    Swal.fire({
-        icon: 'error',
-        title: 'Error de autenticación',
-        text: '{{ error }}',
-    });
-</script>
-{% endif %}
+    <script>
+        Swal.fire({
+            icon: 'error',
+            title: 'Error de autenticación',
+            text: '{{ error }}',
+        });
+    </script>
+    {% endif %}
+    <script>
+        function confirmLogout() {
+            Swal.fire({
+                title: '¿Estás seguro?',
+                text: "Tu sesión será cerrada.",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Sí, cerrar sesión',
+                cancelButtonText: 'Cancelar'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    window.location.href = "{% url 'logout' %}";
+                }
+            });
+        }
+    </script>
 
     <footer class="bg-dark text-light text-center py-3" style="position: fixed; bottom: 0; width: 100%;">
         © 2025 Sistema Editorial Universitaria. Todos los derechos reservados. Herramientas de Productividad
