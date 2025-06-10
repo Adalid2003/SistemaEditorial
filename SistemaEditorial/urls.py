@@ -27,7 +27,7 @@ urlpatterns = [
     path('soli_estimacion/', views.soli_estimacion, name='soli_estimacion'),
     path('nueva_obra/', views.nueva_obra, name='nueva_obra'),
     path('estimaciones_cliente/', views.estimaciones_cliente, name='estimaciones_cliente'),
-    path('logout/', views.logout_view, name='logout'),
+    path('logout/', views.logout, name='logout'),
 ]
 
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
