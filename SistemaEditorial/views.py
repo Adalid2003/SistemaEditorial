@@ -70,8 +70,8 @@ def registro(request):
             contraseña=make_password(password1)
         )
 
-        # Redirigir al login después del registro
-        return redirect('login')
+        # Enviar indicador de éxito
+        return render(request, 'registro.html', {'success': 'El registro fue exitoso'})
 
     return render(request, 'registro.html')
 
