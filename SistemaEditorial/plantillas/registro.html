@@ -1,14 +1,18 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     {% load static %}
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-4Q6Gf2aSP4eDXB8Miphtr37CMZZQ5oXLH2yaXMJ2w8e2ZtHTl7GptT4jmndRuHDT" crossorigin="anonymous">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-4Q6Gf2aSP4eDXB8Miphtr37CMZZQ5oXLH2yaXMJ2w8e2ZtHTl7GptT4jmndRuHDT" crossorigin="anonymous">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <link rel="icon" href="{% static 'images/logo_ues.png' %}" type="image/png">
     <title>Sistema Editorial | Registro</title>
 </head>
+
 <body>
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
         <div class="container-fluid">
@@ -16,25 +20,26 @@
                 <img src="{% static 'images/logo_ues.png' %}" alt="Logo UES" width="50" height="50" class="me-2">
                 Sistema Editorial
             </a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+                aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ms-auto">
                     {% if user.is_authenticated %}
-                        <li class="nav-item">
-                            <a class="nav-link text-light">Perfil</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-light">Cerrar Sesión</a>
-                        </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-light">Perfil</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-light">Cerrar Sesión</a>
+                    </li>
                     {% else %}
-                        <li class="nav-item">
-                            <a class="nav-link text-light" href="{% url 'login' %}">Iniciar Sesión</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-light" href="{% url 'registro' %}">Registrarse</a>
-                        </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-light" href="{% url 'login' %}">Iniciar Sesión</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-light" href="{% url 'registro' %}">Registrarse</a>
+                    </li>
                     {% endif %}
                 </ul>
             </div>
@@ -42,45 +47,48 @@
     </nav>
 
     <div class="container mt-5 d-flex justify-content-center">
-        <form style="max-width: 500px; width: 100%;">
+        <form method="POST" action="{% url 'registro' %}" style="max-width: 500px; width: 100%;">
+            {% csrf_token %}
             <h2 class="text-center mb-4">Registro de Usuario</h2>
 
             <div class="mb-3">
                 <label for="username" class="form-label">Nombre de Usuario</label>
-                <div class="input-group">
-                    <span class="input-group-text"><i class="bi bi-person-circle"></i></span>
-                    <input type="text" class="form-control" id="username" placeholder="Ej: juanperez">
-                </div>
+                <input type="text" class="form-control" id="username" name="username" placeholder="Ej: juanperez" required>
             </div>
 
             <div class="mb-3">
                 <label for="email" class="form-label">Correo Electrónico</label>
-                <div class="input-group">
-                    <span class="input-group-text"><i class="bi bi-envelope-fill"></i></span>
-                    <input type="email" class="form-control" id="email" placeholder="Ej: correo@ejemplo.com">
-                </div>
+                <input type="email" class="form-control" id="email" name="email" placeholder="Ej: correo@ejemplo.com" required>
             </div>
 
             <div class="mb-3">
                 <label for="password1" class="form-label">Contraseña</label>
-                <div class="input-group">
-                    <span class="input-group-text"><i class="bi bi-lock-fill"></i></span>
-                    <input type="password" class="form-control" id="password1" placeholder="Contraseña segura">
-                </div>
+                <input type="password" class="form-control" id="password1" name="password1" placeholder="Contraseña segura" required>
             </div>
 
             <div class="mb-3">
                 <label for="password2" class="form-label">Confirmar Contraseña</label>
-                <div class="input-group">
-                    <span class="input-group-text"><i class="bi bi-lock-fill"></i></span>
-                    <input type="password" class="form-control" id="password2" placeholder="Repite tu contraseña">
-                </div>
+                <input type="password" class="form-control" id="password2" name="password2" placeholder="Repite tu contraseña" required>
             </div>
 
             <button type="submit" class="btn btn-success w-100">Registrarse</button>
         </form>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/js/bootstrap.bundle.min.js" integrity="sha384-j1CDi7MgGQ12Z7Qab0qlWQ/Qqz24Gc6BM0thvEMVjHnfYGF0rmFCozFSxQBxwHKO" crossorigin="anonymous"></script>
+    <!-- SweetAlert para errores -->
+    {% if error %}
+    <script>
+        Swal.fire({
+            icon: 'error',
+            title: 'Error en el registro',
+            text: '{{ error }}',
+        });
+    </script>
+    {% endif %}
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-j1CDi7MgGQ12Z7Qab0qlWQ/Qqz24Gc6BM0thvEMVjHnfYGF0rmFCozFSxQBxwHKO"
+        crossorigin="anonymous"></script>
 </body>
+
 </html>
