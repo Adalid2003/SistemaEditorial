@@ -1,3 +1,4 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="es">
 
@@ -26,7 +27,7 @@
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ms-auto">
-                    {% if user.is_authenticated %}
+                    {% if usuario_tipo == 'cliente' %}
                     <li class="nav-item">
                         <a class="nav-link text-light" href="#">Perfil</a>
                     </li>
@@ -34,7 +35,7 @@
                         <a class="nav-link text-light" href="{% url 'estimaciones_cliente' %}">Estimaciones</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link text-light" href="{% url 'logout' %}">Cerrar Sesión</a>
+                        <a class="nav-link text-light" href="#" onclick="confirmLogout()">Cerrar Sesión</a>
                     </li>
                     {% else %}
                     <li class="nav-item">
@@ -89,42 +90,91 @@
     </div>
 
     <!-- Modal para nueva estimación -->
-    <div class="modal fade" id="nuevaEstimacionModal" tabindex="-1" aria-labelledby="nuevaEstimacionModalLabel"
-        aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="nuevaEstimacionModalLabel">Nueva Estimación</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <form method="POST" action="{% url 'soli_estimacion' %}">
-                    {% csrf_token %}
-                    <div class="modal-body">
-                        <div class="mb-3">
-                            <label for="tituloObra" class="form-label">Título de la Obra</label>
-                            <input type="text" class="form-control" id="tituloObra" name="tituloObra" required>
-                        </div>
-                        <div class="mb-3">
-                            <label for="numeroPaginas" class="form-label">Número de Páginas</label>
-                            <input type="number" class="form-control" id="numeroPaginas" name="numeroPaginas" required>
-                        </div>
-                        <div class="mb-3">
-                            <label for="tirada" class="form-label">Tirada</label>
-                            <input type="number" class="form-control" id="tirada" name="tirada" required>
-                        </div>
-                        <div class="mb-3">
-                            <label for="portada" class="form-label">Portada</label>
-                            <input type="file" class="form-control" id="portada" name="portada" accept="image/*" required>
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                        <button type="submit" class="btn btn-primary">Guardar</button>
-                    </div>
-                </form>
+<div class="modal fade" id="nuevaEstimacionModal" tabindex="-1" aria-labelledby="nuevaEstimacionModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="nuevaEstimacionModalLabel">Nueva Estimación</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
+            <form method="POST" action="{% url 'soli_estimacion' %}" enctype="multipart/form-data">
+                {% csrf_token %}
+                <div class="modal-body">
+                    <!-- Campo: Título de la Obra -->
+                    <div class="mb-3">
+                        <label for="tituloObra" class="form-label">Título de la Obra</label>
+                        <input type="text" class="form-control" id="tituloObra" name="tituloObra" required>
+                    </div>
+
+                    <!-- Campo: Número de Páginas -->
+                    <div class="mb-3">
+                        <label for="numeroPaginas" class="form-label">Número de Páginas</label>
+                        <input type="number" class="form-control" id="numeroPaginas" name="numeroPaginas" required>
+                    </div>
+
+                    <!-- Campo: Tirada -->
+                    <div class="mb-3">
+                        <label for="tirada" class="form-label">Tirada</label>
+                        <input type="number" class="form-control" id="tirada" name="tirada" required>
+                    </div>
+
+                    <!-- Campo: Portada -->
+                    <div class="mb-3">
+                        <label for="portada" class="form-label">Portada</label>
+                        <input type="file" class="form-control" id="portada" name="portada" accept="image/*" required>
+                    </div>
+
+                    <!-- Campo: Depreciación Equipo -->
+                    <div class="mb-3">
+                        <label for="depreciacionEquipo" class="form-label">Depreciación Equipo</label>
+                        <input type="number" class="form-control" id="depreciacionEquipo" name="depreciacionEquipo" step="0.01" required>
+                    </div>
+
+                    <!-- Campo: Energía Eléctrica -->
+                    <div class="mb-3">
+                        <label for="energiaElectrica" class="form-label">Energía Eléctrica</label>
+                        <input type="number" class="form-control" id="energiaElectrica" name="energiaElectrica" step="0.01" required>
+                    </div>
+
+                    <!-- Campo: Costo Producción -->
+                    <div class="mb-3">
+                        <label for="costoProduccion" class="form-label">Costo Producción</label>
+                        <input type="number" class="form-control" id="costoProduccion" name="costoProduccion" step="0.01" required>
+                    </div>
+
+                    <!-- Campo: Total Estimado -->
+                    <div class="mb-3">
+                        <label for="totalEstimado" class="form-label">Total Estimado</label>
+                        <input type="number" class="form-control" id="totalEstimado" name="totalEstimado" step="0.01" required>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Guardar</button>
+                </div>
+            </form>
         </div>
     </div>
+</div>
+    <script>
+        function confirmLogout() {
+            Swal.fire({
+                title: '¿Estás seguro?',
+                text: "Tu sesión será cerrada.",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Sí, cerrar sesión',
+                cancelButtonText: 'Cancelar'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    window.location.href = "{% url 'logout' %}";
+                }
+            });
+        }
+    </script>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/js/bootstrap.bundle.min.js"
         integrity="sha384-j1CDi7MgGQ12Z7Qab0qlWQ/Qqz24Gc6BM0thvEMVjHnfYGF0rmFCozFSxQBxwHKO" crossorigin="anonymous"></script>
