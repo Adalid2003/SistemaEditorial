@@ -3,7 +3,7 @@ from django.contrib.auth.hashers import check_password, make_password
 from django.core.exceptions import ValidationError
 from django.core.validators import validate_email
 from django.contrib.auth.decorators import login_required
-from core.models import Cliente, Empleado, CostoEstimacion, Material, Maquinaria, TipoMaquinaria
+from core.models import Cliente, Empleado, CostoEstimacion, Material, Maquinaria, TipoMaquinaria, Obra, TipoMaterial
 
 def login(request):
     if request.method == 'POST':
@@ -34,7 +34,7 @@ def login(request):
                 # Guardar sesión del empleado
                 request.session['usuario_tipo'] = 'empleado'
                 request.session['usuario_id'] = empleado.id_empleado
-                return redirect('admin/')  # Redirigir al panel de administración
+                return redirect('materiales/')  # Redirigir a lista de materiales
         except Empleado.DoesNotExist:
             pass
 
@@ -76,20 +76,54 @@ def registro(request):
 
     return render(request, 'registro.html')
 
-def soli_estimacion(request):
-    return render(request, 'soli_estimacion.html', {})
 
-def nueva_obra(request):
-    return render(request, 'nueva_obra.html', {})
+def registro_empleado(request):
+    if request.method == 'POST':
+        nombre = request.POST['nombre']
+        correo = request.POST['correo']
+        password1 = request.POST['password1']
+        password2 = request.POST['password2']
+
+        # Validar el formato del correo electrónico
+        try:
+            validate_email(correo)
+        except ValidationError:
+            return render(request, 'registro_empleado.html', {'error': 'El formato del correo electrónico es inválido'})
+
+        # Validar que las contraseñas coincidan
+        if password1 != password2:
+            return render(request, 'registro_empleado.html', {'error': 'Las contraseñas no coinciden'})
+
+        # Validar que el correo no esté registrado
+        if Empleado.objects.filter(correo=correo).exists():
+            return render(request, 'registro_empleado.html', {'error': 'El correo ya está registrado'})
+
+        # Crear el nuevo empleado
+        Empleado.objects.create(
+            nombreEmpleado=nombre,
+            correo=correo,
+            clave=make_password(password1)
+        )
+
+        # Enviar indicador de éxito
+        return render(request, 'registro_empleado.html', {'success': 'El registro fue exitoso'})
+
+    return render(request, 'registro_empleado.html')
+
 
 def estimaciones_cliente(request):
-    # Verificar que el usuario autenticado sea un cliente
-    try:
-        cliente = request.user.cliente  # Esto asume que el usuario tiene un atributo relacionado con Cliente
+    if request.session.get('usuario_tipo') == 'cliente':
+        cliente_id = request.session.get('usuario_id')
+        cliente = Cliente.objects.get(id_cliente=cliente_id)
         estimaciones = CostoEstimacion.objects.filter(id_obra__id_cliente=cliente)
-        return render(request, 'estimaciones_cliente.html', {'estimaciones': estimaciones})
-    except AttributeError:
-        return render(request, 'login.html', {'error': 'Debes iniciar sesión como cliente para acceder a esta página.'})
+        return render(request, 'estimaciones_cliente.html', {
+            'estimaciones': estimaciones,
+            'usuario_tipo': 'cliente'  # Pasar el estado de la sesión al contexto
+        })
+    else:
+        return render(request, 'login.html', {
+            'error': 'Debes iniciar sesión como cliente para acceder a esta página.'
+        })
 
 # CRUD de Materiales
 # Vista para mostrar la lista de materiales y tipos de material
@@ -144,6 +178,80 @@ def eliminar_material(request, id_material):
         material = Material.objects.get(id_material=id_material)
         material.delete()
     return redirect('materiales')
+
+def obras(request):
+    if request.session.get('usuario_tipo') == 'cliente':
+        cliente_id = request.session.get('usuario_id')
+        cliente = Cliente.objects.get(id_cliente=cliente_id)
+        obras = Obra.objects.filter(id_cliente=cliente)  # Filtrar obras del cliente autenticado
+        materiales = Material.objects.all()  # Obtener todos los materiales
+        maquinarias = Maquinaria.objects.all()  # Obtener todas las maquinarias
+        return render(request, 'obras.html', {
+            'obras': obras,
+            'materiales': materiales,
+            'maquinarias': maquinarias,
+            'usuario_tipo': 'cliente'
+        })
+    else:
+        return redirect('login')  # Redirigir al login si no está autenticado como cliente
+
+
+def agregar_obra(request):
+    if request.method == 'POST':
+        cliente_id = request.session.get('usuario_id')
+        cliente = Cliente.objects.get(id_cliente=cliente_id)
+        titulo = request.POST.get('tituloObra')
+        autor = request.POST.get('nombreAutorObra')
+        propietario = request.POST.get('propietarioObra')
+        paginas = request.POST.get('numeroPaginas')
+        tirada = request.POST.get('tirada')
+        portada = request.FILES.get('portada')
+        material_id = request.POST.get('id_material')
+        maquinaria_id = request.POST.get('id_maquinaria')
+
+        material = Material.objects.get(id_material=material_id)
+        maquinaria = Maquinaria.objects.get(id_maquinaria=maquinaria_id)
+
+        Obra.objects.create(
+            tituloObra=titulo,
+            nombreAutorObra=autor,
+            propietarioObra=propietario,
+            numeroPaginas=paginas,
+            tirada=tirada,
+            portada=portada,
+            id_cliente=cliente,
+            id_material=material,
+            id_maquinaria=maquinaria
+        )
+        return redirect('obras')
+
+def editar_obra(request, id_obra):
+    obra = Obra.objects.get(id_obra=id_obra)
+    if request.method == 'POST':
+        obra.tituloObra = request.POST.get('tituloObra')
+        obra.nombreAutorObra = request.POST.get('nombreAutorObra')
+        obra.propietarioObra = request.POST.get('propietarioObra')
+        obra.numeroPaginas = request.POST.get('numeroPaginas')
+        obra.tirada = request.POST.get('tirada')
+        if 'portada' in request.FILES:
+            obra.portada = request.FILES.get('portada')
+        obra.id_material = Material.objects.get(id_material=request.POST.get('id_material'))
+        obra.id_maquinaria = Maquinaria.objects.get(id_maquinaria=request.POST.get('id_maquinaria'))
+        obra.save()
+        return redirect('obras')
+    materiales = Material.objects.all()
+    maquinarias = Maquinaria.objects.all()
+    return render(request, 'editar_obra.html', {
+        'obra': obra,
+        'materiales': materiales,
+        'maquinarias': maquinarias
+    })
+
+
+def eliminar_obra(request, id_obra):
+    obra = Obra.objects.get(id_obra=id_obra)
+    obra.delete()
+    return redirect('obras')
 
 def logout(request):
     # Eliminar la sesión del usuario

@@ -24,14 +24,17 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('login/', views.login, name='login'),
     path('registro/', views.registro, name='registro'),
-    path('soli_estimacion/', views.soli_estimacion, name='soli_estimacion'),
-    path('nueva_obra/', views.nueva_obra, name='nueva_obra'),
     path('estimaciones_cliente/', views.estimaciones_cliente, name='estimaciones_cliente'),
     path('materiales/', views.materiales, name='materiales'),
     path('materiales/agregar/', views.agregar_material, name='agregar_material'),
     path('materiales/editar/<int:id_material>/', views.editar_material, name='editar_material'),
     path('materiales/eliminar/<int:id_material>/', views.eliminar_material, name='eliminar_material'),
     path('logout/', views.logout, name='logout'),
+    path('obras/', views.obras, name='obras'),
+    path('obras/agregar/', views.agregar_obra, name='agregar_obra'),
+    path('obras/editar/<int:id_obra>/', views.editar_obra, name='editar_obra'),
+    path('obras/eliminar/<int:id_obra>/', views.eliminar_obra, name='eliminar_obra'),
+    path('registro_empleado/', views.registro_empleado, name='registro_empleado'),
 ]
 
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

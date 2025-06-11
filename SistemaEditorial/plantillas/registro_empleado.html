@@ -1,11 +1,10 @@
-{% extends 'base.html' %}
+{% extends 'base_empleado.html' %}
 
 {% block title %}
-Sistema Editorial Universitaria - Registro de Usuario
+Registro de Empleado
 {% endblock %}
 
 {% block content %}
-
 <div class="container mt-5 d-flex justify-content-center">
     <form method="POST" action="{% url 'registro' %}" style="max-width: 500px; width: 100%;">
         {% csrf_token %}
