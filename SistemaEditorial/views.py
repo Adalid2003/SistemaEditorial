@@ -1,8 +1,9 @@
+from django.contrib.auth import authenticate, login
 from django.shortcuts import render, redirect
-from django.contrib.auth.hashers import check_password, make_password
 from django.core.exceptions import ValidationError
 from django.core.validators import validate_email
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.hashers import make_password, check_password
 from core.models import Cliente, Empleado, CostoEstimacion, Material, Maquinaria, TipoMaquinaria
 
 def login(request):
@@ -10,38 +11,30 @@ def login(request):
         correo = request.POST['correo']
         password = request.POST['password']
 
-        # Validar el formato del correo electrónico
-        try:
-            validate_email(correo)
-        except ValidationError:
-            return render(request, 'login.html', {'error': 'El formato del correo electrónico es inválido'})
-
-        # Intentar autenticar como cliente
         try:
             cliente = Cliente.objects.get(correoElectronico=correo)
             if check_password(password, cliente.contraseña):
-                # Guardar sesión del cliente
                 request.session['usuario_tipo'] = 'cliente'
                 request.session['usuario_id'] = cliente.id_cliente
-                return redirect('estimaciones_cliente')  # Redirigir a estimaciones del cliente
+                print("Cliente autenticado correctamente")  # Mensaje de depuración
+                return redirect('estimaciones_cliente')
         except Cliente.DoesNotExist:
             pass
 
-        # Intentar autenticar como empleado
         try:
             empleado = Empleado.objects.get(correo=correo)
             if check_password(password, empleado.clave):
-                # Guardar sesión del empleado
                 request.session['usuario_tipo'] = 'empleado'
                 request.session['usuario_id'] = empleado.id_empleado
-                return redirect('admin/')  # Redirigir al panel de administración
+                print("Empleado autenticado correctamente")  # Mensaje de depuración
+                return redirect('admin/')
         except Empleado.DoesNotExist:
             pass
 
-        # Si no se encuentra el usuario
+        print("Autenticación fallida")  # Mensaje de depuración
         return render(request, 'login.html', {'error': 'Correo o contraseña incorrectos'})
 
-    return render(request, 'login.html', {})
+    return render(request, 'login.html', {'usuario_tipo': None})  # Pasar estado de sesión vacío
 
 def registro(request):
     if request.method == 'POST':
@@ -82,17 +75,19 @@ def soli_estimacion(request):
 def nueva_obra(request):
     return render(request, 'nueva_obra.html', {})
 
-@login_required
+
 def estimaciones_cliente(request):
-    # Verificar que el usuario autenticado sea un cliente
-    try:
-        cliente = request.user.cliente  # Esto asume que el usuario tiene un atributo relacionado con Cliente
+    if request.session.get('usuario_tipo') == 'cliente':
+        cliente_id = request.session.get('usuario_id')
+        cliente = Cliente.objects.get(id_cliente=cliente_id)
         estimaciones = CostoEstimacion.objects.filter(id_obra__id_cliente=cliente)
-        return render(request, 'estimaciones_cliente.html', {'estimaciones': estimaciones})
-    except AttributeError:
-        return render(request, 'login.html', {'error': 'Debes iniciar sesión como cliente para acceder a esta página.'})
+        return render(request, 'estimaciones_cliente.html', {
+            'estimaciones': estimaciones,
+            'usuario_tipo': 'cliente'  # Pasar el estado de la sesión
+        })
+    else:
+        return redirect('login')  # Redirigir al login si no está autenticado como cliente
 
 def logout(request):
-    # Eliminar la sesión del usuario
-    request.session.flush()
+    request.session.flush()  # Eliminar todos los datos de la sesión
     return redirect('login')  # Redirigir al login después de cerrar sesión
