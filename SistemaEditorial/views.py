@@ -1,9 +1,8 @@
-from django.contrib.auth import authenticate, login
 from django.shortcuts import render, redirect
+from django.contrib.auth.hashers import check_password, make_password
 from django.core.exceptions import ValidationError
 from django.core.validators import validate_email
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth.hashers import make_password, check_password
 from core.models import Cliente, Empleado, CostoEstimacion, Material, Maquinaria, TipoMaquinaria
 
 def login(request):
@@ -11,30 +10,38 @@ def login(request):
         correo = request.POST['correo']
         password = request.POST['password']
 
+        # Validar el formato del correo electrónico
+        try:
+            validate_email(correo)
+        except ValidationError:
+            return render(request, 'login.html', {'error': 'El formato del correo electrónico es inválido'})
+
+        # Intentar autenticar como cliente
         try:
             cliente = Cliente.objects.get(correoElectronico=correo)
             if check_password(password, cliente.contraseña):
+                # Guardar sesión del cliente
                 request.session['usuario_tipo'] = 'cliente'
                 request.session['usuario_id'] = cliente.id_cliente
-                print("Cliente autenticado correctamente")  # Mensaje de depuración
-                return redirect('estimaciones_cliente')
+                return redirect('estimaciones_cliente')  # Redirigir a estimaciones del cliente
         except Cliente.DoesNotExist:
             pass
 
+        # Intentar autenticar como empleado
         try:
             empleado = Empleado.objects.get(correo=correo)
             if check_password(password, empleado.clave):
+                # Guardar sesión del empleado
                 request.session['usuario_tipo'] = 'empleado'
                 request.session['usuario_id'] = empleado.id_empleado
-                print("Empleado autenticado correctamente")  # Mensaje de depuración
-                return redirect('admin/')
+                return redirect('admin/')  # Redirigir al panel de administración
         except Empleado.DoesNotExist:
             pass
 
-        print("Autenticación fallida")  # Mensaje de depuración
+        # Si no se encuentra el usuario
         return render(request, 'login.html', {'error': 'Correo o contraseña incorrectos'})
 
-    return render(request, 'login.html', {'usuario_tipo': None})  # Pasar estado de sesión vacío
+    return render(request, 'login.html', {})
 
 def registro(request):
     if request.method == 'POST':
@@ -75,19 +82,71 @@ def soli_estimacion(request):
 def nueva_obra(request):
     return render(request, 'nueva_obra.html', {})
 
-
+@login_required
 def estimaciones_cliente(request):
-    if request.session.get('usuario_tipo') == 'cliente':
-        cliente_id = request.session.get('usuario_id')
-        cliente = Cliente.objects.get(id_cliente=cliente_id)
+    # Verificar que el usuario autenticado sea un cliente
+    try:
+        cliente = request.user.cliente  # Esto asume que el usuario tiene un atributo relacionado con Cliente
         estimaciones = CostoEstimacion.objects.filter(id_obra__id_cliente=cliente)
-        return render(request, 'estimaciones_cliente.html', {
-            'estimaciones': estimaciones,
-            'usuario_tipo': 'cliente'  # Pasar el estado de la sesión
-        })
-    else:
-        return redirect('login')  # Redirigir al login si no está autenticado como cliente
+        return render(request, 'estimaciones_cliente.html', {'estimaciones': estimaciones})
+    except AttributeError:
+        return render(request, 'login.html', {'error': 'Debes iniciar sesión como cliente para acceder a esta página.'})
+
+# CRUD de Materiales
+# Vista para mostrar la lista de materiales y tipos de material
+@login_required
+def materiales(request):
+    materiales = Material.objects.all()
+    tipos_material = TipoMaterial.objects.all()
+    return render(request, 'materiales.html', {
+        'materiales': materiales,
+        'tipos_material': tipos_material
+    })
+
+# Vista para agregar un nuevo material
+@login_required
+def agregar_material(request):
+    if request.method == 'POST':
+        tipo_id = request.POST.get('id_tipomaterial')
+        nombre = request.POST.get('nombre')
+        descripcion = request.POST.get('descripcion')
+        costo_unitario = request.POST.get('costo_unitario')
+        unidad_medida = request.POST.get('unidad_medida')
+        tipo = TipoMaterial.objects.get(id_tipomaterial=tipo_id)
+        Material.objects.create(
+            id_tipomaterial=tipo,
+            nombre=nombre,
+            descripcion=descripcion,
+            costo_unitario=costo_unitario,
+            unidad_medida=unidad_medida
+        )
+    return redirect('materiales')
+
+# Vista para editar un material existente
+@login_required
+def editar_material(request, id_material):
+    material = Material.objects.get(id_material=id_material)
+    if request.method == 'POST':
+        tipo_id = request.POST.get('id_tipomaterial')
+        material.id_tipomaterial = TipoMaterial.objects.get(id_tipomaterial=tipo_id)
+        material.nombre = request.POST.get('nombre')
+        material.descripcion = request.POST.get('descripcion')
+        material.costo_unitario = request.POST.get('costo_unitario')
+        material.unidad_medida = request.POST.get('unidad_medida')
+        material.save()
+        return redirect('materiales')
+    # Si quieres permitir edición por GET, puedes retornar el modal aquí
+    return redirect('materiales')
+
+# Vista para eliminar un material
+@login_required
+def eliminar_material(request, id_material):
+    if request.method == 'POST':
+        material = Material.objects.get(id_material=id_material)
+        material.delete()
+    return redirect('materiales')
 
 def logout(request):
-    request.session.flush()  # Eliminar todos los datos de la sesión
+    # Eliminar la sesión del usuario
+    request.session.flush()
     return redirect('login')  # Redirigir al login después de cerrar sesión
