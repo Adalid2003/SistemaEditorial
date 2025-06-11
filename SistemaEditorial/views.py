@@ -3,7 +3,7 @@ from django.contrib.auth.hashers import check_password, make_password
 from django.core.exceptions import ValidationError
 from django.core.validators import validate_email
 from django.contrib.auth.decorators import login_required
-from core.models import Cliente, Empleado, CostoEstimacion, Material, Maquinaria, TipoMaquinaria, Obra, TipoMaterial
+from core.models import Cliente, Empleado, CostoEstimacion, Material, TipoMaterial, Maquinaria, TipoMaquinaria, Obra
 
 def login(request):
     if request.method == 'POST':
@@ -252,6 +252,48 @@ def eliminar_obra(request, id_obra):
     obra = Obra.objects.get(id_obra=id_obra)
     obra.delete()
     return redirect('obras')
+
+
+def maquinaria(request):
+    maquinarias = Maquinaria.objects.all()
+    tipos_maquinaria = TipoMaquinaria.objects.all()
+    return render(request, 'maquinaria.html', {
+        'maquinarias': maquinarias,
+        'tipos_maquinaria': tipos_maquinaria
+    })
+
+def agregar_maquinaria(request):
+    if request.method == 'POST':
+        tipo_id = request.POST.get('id_tipoMaquinaria')
+        nombre = request.POST.get('nombreMaquinaria')
+        vida_util = request.POST.get('vidaUtilAnion')
+        consumo = request.POST.get('consumoEnergiaKw')
+        tipo = TipoMaquinaria.objects.get(id_tipoMaquinaria=tipo_id)
+        Maquinaria.objects.create(
+            id_tipoMaquinaria=tipo,
+            nombreMaquinaria=nombre,
+            vidaUtilAnion=vida_util,
+            consumoEnergiaKw=consumo
+        )
+    return redirect('maquinaria')
+
+def editar_maquinaria(request, id_maquinaria):
+    maq = Maquinaria.objects.get(id_maquinaria=id_maquinaria)
+    if request.method == 'POST':
+        tipo_id = request.POST.get('id_tipoMaquinaria')
+        maq.id_tipoMaquinaria = TipoMaquinaria.objects.get(id_tipoMaquinaria=tipo_id)
+        maq.nombreMaquinaria = request.POST.get('nombreMaquinaria')
+        maq.vidaUtilAnion = request.POST.get('vidaUtilAnion')
+        maq.consumoEnergiaKw = request.POST.get('consumoEnergiaKw')
+        maq.save()
+        return redirect('maquinaria')
+    return redirect('maquinaria')
+
+def eliminar_maquinaria(request, id_maquinaria):
+    if request.method == 'POST':
+        maq = Maquinaria.objects.get(id_maquinaria=id_maquinaria)
+        maq.delete()
+    return redirect('maquinaria')
 
 def logout(request):
     # Eliminar la sesión del usuario

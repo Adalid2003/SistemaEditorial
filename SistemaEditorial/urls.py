@@ -35,6 +35,10 @@ urlpatterns = [
     path('obras/editar/<int:id_obra>/', views.editar_obra, name='editar_obra'),
     path('obras/eliminar/<int:id_obra>/', views.eliminar_obra, name='eliminar_obra'),
     path('registro_empleado/', views.registro_empleado, name='registro_empleado'),
+    path('maquinaria/', views.maquinaria, name='maquinaria'),
+    path('maquinaria/agregar/', views.agregar_maquinaria, name='agregar_maquinaria'),
+    path('maquinaria/editar/<int:id_maquinaria>/', views.editar_maquinaria, name='editar_maquinaria'),
+    path('maquinaria/eliminar/<int:id_maquinaria>/', views.eliminar_maquinaria, name='eliminar_maquinaria'),
 ]
 
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
