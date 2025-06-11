@@ -27,7 +27,12 @@ urlpatterns = [
     path('soli_estimacion/', views.soli_estimacion, name='soli_estimacion'),
     path('nueva_obra/', views.nueva_obra, name='nueva_obra'),
     path('estimaciones_cliente/', views.estimaciones_cliente, name='estimaciones_cliente'),
+    path('materiales/', views.materiales, name='materiales'),
+    path('materiales/agregar/', views.agregar_material, name='agregar_material'),
+    path('materiales/editar/<int:id_material>/', views.editar_material, name='editar_material'),
+    path('materiales/eliminar/<int:id_material>/', views.eliminar_material, name='eliminar_material'),
     path('logout/', views.logout, name='logout'),
 ]
 
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+
