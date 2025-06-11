@@ -82,7 +82,6 @@ def soli_estimacion(request):
 def nueva_obra(request):
     return render(request, 'nueva_obra.html', {})
 
-@login_required
 def estimaciones_cliente(request):
     # Verificar que el usuario autenticado sea un cliente
     try:
