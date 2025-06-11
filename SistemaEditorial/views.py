@@ -93,7 +93,7 @@ def estimaciones_cliente(request):
 
 # CRUD de Materiales
 # Vista para mostrar la lista de materiales y tipos de material
-@login_required
+
 def materiales(request):
     materiales = Material.objects.all()
     tipos_material = TipoMaterial.objects.all()
@@ -103,7 +103,7 @@ def materiales(request):
     })
 
 # Vista para agregar un nuevo material
-@login_required
+
 def agregar_material(request):
     if request.method == 'POST':
         tipo_id = request.POST.get('id_tipomaterial')
@@ -122,7 +122,7 @@ def agregar_material(request):
     return redirect('materiales')
 
 # Vista para editar un material existente
-@login_required
+
 def editar_material(request, id_material):
     material = Material.objects.get(id_material=id_material)
     if request.method == 'POST':
@@ -138,7 +138,7 @@ def editar_material(request, id_material):
     return redirect('materiales')
 
 # Vista para eliminar un material
-@login_required
+
 def eliminar_material(request, id_material):
     if request.method == 'POST':
         material = Material.objects.get(id_material=id_material)
