@@ -1,11 +1,135 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>maquinaria</title>
-</head>
-<body>
-    
-</body>
-</html>
+{% extends 'base.html' %}
+
+{% block title %}
+Maquinaria
+{% endblock %}
+
+{% block content %}
+<h1 class="text-center mb-4">Maquinaria Registrada</h1>
+
+<!-- Tabla de maquinaria -->
+<table class="table table-bordered table-hover">
+    <thead class="table-dark">
+        <tr>
+            <th>ID</th>
+            <th>Tipo de Maquinaria</th>
+            <th>Nombre</th>
+            <th>Años de Vida Útil</th>
+            <th>Consumo Energía (kW)</th>
+            <th>Acciones</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for maq in maquinarias %}
+        <tr>
+            <td>{{ maq.id_maquinaria }}</td>
+            <td>{{ maq.id_tipoMaquinaria.tipoMaquinaria }}</td>
+            <td>{{ maq.nombreMaquinaria }}</td>
+            <td>{{ maq.vidaUtilAnion }}</td>
+            <td>{{ maq.consumoEnergiaKw }}</td>
+            <td>
+                <!-- Botón editar -->
+                <button class="btn btn-warning btn-sm" data-bs-toggle="modal" data-bs-target="#editarMaquinariaModal{{ maq.id_maquinaria }}">
+                    <i class="bi bi-pencil"></i>
+                </button>
+                <!-- Botón eliminar -->
+                <form method="POST" action="{% url 'eliminar_maquinaria' maq.id_maquinaria %}" style="display:inline;">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('¿Seguro que deseas eliminar esta maquinaria?');">
+                        <i class="bi bi-trash"></i>
+                    </button>
+                </form>
+            </td>
+        </tr>
+
+        <!-- Modal Editar Maquinaria -->
+        <div class="modal fade" id="editarMaquinariaModal{{ maq.id_maquinaria }}" tabindex="-1" aria-labelledby="editarMaquinariaModalLabel{{ maq.id_maquinaria }}" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <form method="POST" action="{% url 'editar_maquinaria' maq.id_maquinaria %}">
+                        {% csrf_token %}
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="editarMaquinariaModalLabel{{ maq.id_maquinaria }}">Editar Maquinaria</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="mb-3">
+                                <label class="form-label">Tipo de Maquinaria</label>
+                                <select class="form-select" name="id_tipoMaquinaria" required>
+                                    {% for tipo in tipos_maquinaria %}
+                                    <option value="{{ tipo.id_tipoMaquinaria }}" {% if tipo.id_tipoMaquinaria == maq.id_tipoMaquinaria.id_tipoMaquinaria %}selected{% endif %}>{{ tipo.tipoMaquinaria }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Nombre</label>
+                                <input type="text" class="form-control" name="nombreMaquinaria" value="{{ maq.nombreMaquinaria }}" required>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Años de Vida Útil</label>
+                                <input type="number" class="form-control" name="vidaUtilAnion" value="{{ maq.vidaUtilAnion }}" required>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Consumo Energía (kW)</label>
+                                <input type="number" step="0.01" class="form-control" name="consumoEnergiaKw" value="{{ maq.consumoEnergiaKw }}" required>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                            <button type="submit" class="btn btn-primary">Guardar Cambios</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </tbody>
+</table>
+
+<!-- Botón para agregar nueva maquinaria -->
+<button type="button" class="btn btn-primary mt-4" data-bs-toggle="modal" data-bs-target="#nuevaMaquinariaModal">
+    Agregar Nueva Maquinaria
+</button>
+
+<!-- Modal para nueva maquinaria -->
+<div class="modal fade" id="nuevaMaquinariaModal" tabindex="-1" aria-labelledby="nuevaMaquinariaModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form method="POST" action="{% url 'agregar_maquinaria' %}">
+                {% csrf_token %}
+                <div class="modal-header">
+                    <h5 class="modal-title" id="nuevaMaquinariaModalLabel">Nueva Maquinaria</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Tipo de Maquinaria</label>
+                        <select class="form-select" name="id_tipoMaquinaria" required>
+                            <option value="">Seleccione un tipo</option>
+                            {% for tipo in tipos_maquinaria %}
+                            <option value="{{ tipo.id_tipoMaquinaria }}">{{ tipo.tipoMaquinaria }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Nombre</label>
+                        <input type="text" class="form-control" name="nombreMaquinaria" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Años de Vida Útil</label>
+                        <input type="number" class="form-control" name="vidaUtilAnion" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Consumo Energía (kW)</label>
+                        <input type="number" step="0.01" class="form-control" name="consumoEnergiaKw" required>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Guardar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
