@@ -239,7 +239,23 @@ def agregar_obra(request):
         material_id = request.POST.get('id_material')
         maquinaria_id = request.POST.get('id_maquinaria')
 
-        # Validación del formato de la imagen
+        # Validaciones
+        if not titulo or not autor or not propietario or not paginas or not tirada or not material_id or not maquinaria_id:
+            return render(request, 'obras.html', {
+                'error': 'Todos los campos son obligatorios.',
+                'obras': Obra.objects.all(),
+                'materiales': Material.objects.all(),
+                'maquinarias': Maquinaria.objects.all()
+            })
+
+        if int(paginas) <= 0 or int(tirada) <= 0:
+            return render(request, 'obras.html', {
+                'error': 'El número de páginas y la tirada deben ser valores positivos.',
+                'obras': Obra.objects.all(),
+                'materiales': Material.objects.all(),
+                'maquinarias': Maquinaria.objects.all()
+            })
+
         if portada:
             extension = os.path.splitext(portada.name)[1].lower()
             if extension not in ['.png', '.jpg', '.jpeg']:
@@ -250,11 +266,21 @@ def agregar_obra(request):
                     'maquinarias': Maquinaria.objects.all()
                 })
 
-        # Crear la obra
-        cliente = Cliente.objects.get(id_cliente=request.session.get('usuario_id'))
-        material = Material.objects.get(id_material=material_id)
-        maquinaria = Maquinaria.objects.get(id_maquinaria=maquinaria_id)
+        try:
+            cliente = Cliente.objects.get(id_cliente=request.session.get('usuario_id'))
+            material = Material.objects.get(id_material=material_id)
+            maquinaria = Maquinaria.objects.get(id_maquinaria=maquinaria_id)
+            estado_inicial = Estado.objects.get(nombreEstado='espera')
+        except Cliente.DoesNotExist:
+            return render(request, 'obras.html', {'error': 'Cliente no encontrado.'})
+        except Material.DoesNotExist:
+            return render(request, 'obras.html', {'error': 'Material no encontrado.'})
+        except Maquinaria.DoesNotExist:
+            return render(request, 'obras.html', {'error': 'Maquinaria no encontrada.'})
+        except Estado.DoesNotExist:
+            return render(request, 'obras.html', {'error': 'Estado inicial no encontrado.'})
 
+        # Crear la obra
         Obra.objects.create(
             tituloObra=titulo,
             nombreAutorObra=autor,
@@ -264,10 +290,12 @@ def agregar_obra(request):
             portada=portada,
             id_cliente=cliente,
             id_material=material,
-            id_maquinaria=maquinaria
+            id_maquinaria=maquinaria,
+            id_estado=estado_inicial
         )
         return redirect('obras')
     return render(request, 'obras.html')
+
 
 def editar_obra(request, id_obra):
     obra = Obra.objects.get(id_obra=id_obra)
@@ -281,14 +309,17 @@ def editar_obra(request, id_obra):
             obra.portada = request.FILES.get('portada')
         obra.id_material = Material.objects.get(id_material=request.POST.get('id_material'))
         obra.id_maquinaria = Maquinaria.objects.get(id_maquinaria=request.POST.get('id_maquinaria'))
+        obra.id_estado = Estado.objects.get(id_estado=request.POST.get('id_estado'))  # Actualizar estado
         obra.save()
         return redirect('obras')
     materiales = Material.objects.all()
     maquinarias = Maquinaria.objects.all()
+    estados = Estado.objects.all()  # Obtener todos los estados
     return render(request, 'editar_obra.html', {
         'obra': obra,
         'materiales': materiales,
-        'maquinarias': maquinarias
+        'maquinarias': maquinarias,
+        'estados': estados
     })
 
 
