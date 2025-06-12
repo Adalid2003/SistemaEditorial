@@ -24,20 +24,26 @@ class Empleado(models.Model):
 
 # Modelo para Obra
 class Obra(models.Model):
-    id_obra = models.AutoField(primary_key=True)
-    tituloObra = models.CharField(max_length=50)
-    nombreAutorObra = models.CharField(max_length=50)
-    propietarioObra = models.CharField(max_length=50)
+    tituloObra = models.CharField(max_length=255)
+    nombreAutorObra = models.CharField(max_length=255)
+    propietarioObra = models.CharField(max_length=255)
     numeroPaginas = models.IntegerField()
     tirada = models.IntegerField()
     portada = models.ImageField(upload_to='portadas/')
-    id_cliente = models.ForeignKey(Cliente, on_delete=models.CASCADE)
     id_material = models.ForeignKey('Material', on_delete=models.CASCADE)
     id_maquinaria = models.ForeignKey('Maquinaria', on_delete=models.CASCADE)
+    id_cliente = models.ForeignKey('Cliente', on_delete=models.CASCADE)
+    id_estado = models.ForeignKey('Estado', on_delete=models.CASCADE, default=1)  # Relación con Estado
+
+    def calcular_estimacion(self):
+        # Lógica para calcular la estimación
+        costo_por_pagina = 0.5  # Costo por página
+        costo_por_tirada = 0.1  # Costo por unidad de tirada
+        estimacion = (self.numeroPaginas * costo_por_pagina) + (self.tirada * costo_por_tirada)
+        return estimacion
 
     def __str__(self):
         return self.tituloObra
-
 
 # Modelo para Material
 class Material(models.Model):
@@ -113,4 +119,10 @@ class CostoEstimacion(models.Model):
 
     def __str__(self):
         return f"Estimación {self.id_costoEstimacion} - Obra {self.id_obra}"
+    
+class Estado(models.Model):
+    nombreEstado = models.CharField(max_length=50, unique=True)  # Ejemplo: "espera", "estimada", etc.
+
+    def __str__(self):
+        return self.nombreEstado
 # Create your models here.

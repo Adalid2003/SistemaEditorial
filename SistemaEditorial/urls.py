@@ -42,6 +42,8 @@ urlpatterns = [
     path('maquinaria/eliminar/<int:id_maquinaria>/', views.eliminar_maquinaria, name='eliminar_maquinaria'),
     path('maquinaria/tipo/agregar/', views.agregar_tipo_maquinaria, name='agregar_tipo_maquinaria'),
     path('login_empleado/', views.login_empleado, name='login_empleado'),
+    path('obras/empleado/', views.obras_empleado, name='obras_empleado'),  # URL para la vista de obras de empleados
+    path('obras/estimar/<int:id_obra>/', views.estimar_obra, name='estimar_obra'),  # URL para estimar una obra
 ]
 
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

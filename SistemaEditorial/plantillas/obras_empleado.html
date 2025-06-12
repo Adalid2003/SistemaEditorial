@@ -1,0 +1,45 @@
+{% extends 'base_empleado.html' %}
+
+{% block title %}
+Sistema Editorial | Obras
+{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <h1 class="text-center mb-4">Obras</h1>
+    <div class="row">
+        {% for obra in obras %}
+        <div class="col-md-4 mb-4">
+            <div class="card">
+                <img src="{{ obra.portada.url }}" class="card-img-top" alt="Portada de {{ obra.tituloObra }}"
+                    style="height: 200px; object-fit: cover;">
+                <div class="card-body">
+                    <h5 class="card-title">{{ obra.tituloObra }}</h5>
+                    <p class="card-text">
+                        <strong>Autor:</strong> {{ obra.nombreAutorObra }}<br>
+                        <strong>Propietario:</strong> {{ obra.propietarioObra }}<br>
+                        <strong>Número de Páginas:</strong> {{ obra.numeroPaginas }}<br>
+                        <strong>Tirada:</strong> {{ obra.tirada }}<br>
+                        <strong>Estado:</strong> {{ obra.id_estado.nombreEstado }}
+                    </p>
+                    <div class="d-flex justify-content-between">
+                        {% if obra.id_estado.nombreEstado == 'espera' %}
+                        <form method="POST" action="{% url 'estimar_obra' obra.id_obra %}">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-success btn-sm">
+                                <i class="bi bi-check-circle"></i> Estimar
+                            </button>
+                        </form>
+                        {% else %}
+                        <button class="btn btn-secondary btn-sm" disabled>
+                            <i class="bi bi-check-circle"></i> Estimada
+                        </button>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

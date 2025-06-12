@@ -3,7 +3,8 @@ from django.contrib.auth.hashers import check_password, make_password
 from django.core.exceptions import ValidationError
 from django.core.validators import validate_email
 from django.contrib.auth.decorators import login_required
-from core.models import Cliente, Empleado, CostoEstimacion, Material, TipoMaterial, Maquinaria, TipoMaquinaria, Obra
+import os
+from core.models import Cliente, Empleado, CostoEstimacion, Material, TipoMaterial, Maquinaria, TipoMaquinaria, Obra, Estado
 
 def login(request):
     if request.method == 'POST':
@@ -23,7 +24,7 @@ def login(request):
                 # Guardar sesión del cliente
                 request.session['usuario_tipo'] = 'cliente'
                 request.session['usuario_id'] = cliente.id_cliente
-                return redirect('estimaciones_cliente')  # Redirigir a estimaciones del cliente
+                return redirect('obras')  # Redirigir a estimaciones del cliente
         except Cliente.DoesNotExist:
             pass
 
@@ -229,8 +230,6 @@ def obras(request):
 
 def agregar_obra(request):
     if request.method == 'POST':
-        cliente_id = request.session.get('usuario_id')
-        cliente = Cliente.objects.get(id_cliente=cliente_id)
         titulo = request.POST.get('tituloObra')
         autor = request.POST.get('nombreAutorObra')
         propietario = request.POST.get('propietarioObra')
@@ -240,6 +239,19 @@ def agregar_obra(request):
         material_id = request.POST.get('id_material')
         maquinaria_id = request.POST.get('id_maquinaria')
 
+        # Validación del formato de la imagen
+        if portada:
+            extension = os.path.splitext(portada.name)[1].lower()
+            if extension not in ['.png', '.jpg', '.jpeg']:
+                return render(request, 'obras.html', {
+                    'error': 'El archivo de portada debe estar en formato PNG, JPG o JPEG.',
+                    'obras': Obra.objects.all(),
+                    'materiales': Material.objects.all(),
+                    'maquinarias': Maquinaria.objects.all()
+                })
+
+        # Crear la obra
+        cliente = Cliente.objects.get(id_cliente=request.session.get('usuario_id'))
         material = Material.objects.get(id_material=material_id)
         maquinaria = Maquinaria.objects.get(id_maquinaria=maquinaria_id)
 
@@ -255,6 +267,7 @@ def agregar_obra(request):
             id_maquinaria=maquinaria
         )
         return redirect('obras')
+    return render(request, 'obras.html')
 
 def editar_obra(request, id_obra):
     obra = Obra.objects.get(id_obra=id_obra)
@@ -284,6 +297,34 @@ def eliminar_obra(request, id_obra):
     obra.delete()
     return redirect('obras')
 
+def estimar_obra(request, id_obra):
+    if request.session.get('usuario_tipo') != 'empleado':  # Verificar si el usuario es empleado
+        return redirect('login_empleado')
+
+    try:
+        obra = Obra.objects.get(id_obra=id_obra)
+        estimacion = obra.calcular_estimacion()  # Ejecutar el método de estimación
+        CostoEstimacion.objects.create(
+            id_obra=obra,
+            costo_estimado=estimacion
+        )
+        obra.id_estado = Estado.objects.get(nombreEstado='estimada')  # Cambiar el estado de la obra
+        obra.save()
+        return redirect('obras_empleado')
+    except Obra.DoesNotExist:
+        return redirect('obras_empleado')  # Redirigir si la obra no existe
+
+def obras_empleado(request):
+    if request.session.get('usuario_tipo') != 'empleado':  # Verificar si el usuario es empleado
+        return redirect('login_empleado')
+
+    obras = Obra.objects.all()  # Mostrar todas las obras
+    estados = Estado.objects.all()  # Obtener todos los estados
+    return render(request, 'obras_empleado.html', {
+        'obras': obras,
+        'estados': estados,
+        'usuario_tipo': 'empleado'
+    })
 
 def maquinaria(request):
     if request.session.get('usuario_tipo') == 'empleado':  # Verificar si el usuario es un empleado

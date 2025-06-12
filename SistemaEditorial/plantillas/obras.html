@@ -1,54 +1,140 @@
 {% extends 'base.html' %}
 
 {% block title %}
-Obras
+Sistema Editorial | Obras
 {% endblock %}
 
 {% block content %}
 <div class="container mt-5">
-    <h1 class="mb-4">Obras</h1>
+    <h1 class="text-center mb-4">Obras</h1>
     <button class="btn btn-primary mb-3" data-bs-toggle="modal" data-bs-target="#nuevaObraModal">Agregar Nueva Obra</button>
-    <table class="table table-striped">
-        <thead>
-            <tr>
-                <th>Título</th>
-                <th>Autor</th>
-                <th>Propietario</th>
-                <th>Número de Páginas</th>
-                <th>Tirada</th>
-                <th>Portada</th>
-                <th>Acciones</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for obra in obras %}
-            <tr>
-                <td>{{ obra.tituloObra }}</td>
-                <td>{{ obra.nombreAutorObra }}</td>
-                <td>{{ obra.propietarioObra }}</td>
-                <td>{{ obra.numeroPaginas }}</td>
-                <td>{{ obra.tirada }}</td>
-                <td>
-                    <img src="{{ obra.portada.url }}" alt="Portada" width="50">
-                </td>
-                <td>
-                    <!-- Botón editar -->
-                    <a href="{% url 'editar_obra' obra.id_obra %}" class="btn btn-warning btn-sm">
-                        <i class="bi bi-pencil"></i>
-                    </a>
-                    <!-- Botón eliminar -->
-                    <form method="POST" action="{% url 'eliminar_obra' obra.id_obra %}" style="display:inline;">
-                        {% csrf_token %}
-                        <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('¿Seguro que deseas eliminar esta obra?');">
-                            <i class="bi bi-trash"></i>
+    <div class="row">
+        {% for obra in obras %}
+        <div class="col-md-4 mb-4">
+            <div class="card">
+                <!-- Imagen con funcionalidad de zoom -->
+                <img src="{{ obra.portada.url }}" class="card-img-top" alt="Portada de {{ obra.tituloObra }}"
+                    style="height: 200px; object-fit: cover; cursor: pointer;" data-bs-toggle="modal"
+                    data-bs-target="#zoomPortadaModal{{ obra.id_obra }}">
+                <div class="card-body">
+                    <h5 class="card-title">{{ obra.tituloObra }}</h5>
+                    <p class="card-text">
+                        <strong>Autor:</strong> {{ obra.nombreAutorObra }}<br>
+                        <strong>Propietario:</strong> {{ obra.propietarioObra }}<br>
+                        <strong>Número de Páginas:</strong> {{ obra.numeroPaginas }}<br>
+                        <strong>Tirada:</strong> {{ obra.tirada }}
+                    </p>
+                    <div class="d-flex justify-content-between">
+                        <!-- Botón para abrir el modal de edición -->
+                        <button class="btn btn-warning btn-sm" data-bs-toggle="modal"
+                            data-bs-target="#editarObraModal{{ obra.id_obra }}">
+                            <i class="bi bi-pencil"></i> Editar
                         </button>
+                        <!-- Botón eliminar -->
+                        <form method="POST" action="{% url 'eliminar_obra' obra.id_obra %}" style="display:inline;">
+                            {% csrf_token %}
+                            <button type="button" class="btn btn-danger btn-sm"
+                                onclick="confirmDelete('{{ obra.id_obra }}');">
+                                <i class="bi bi-trash"></i> Eliminar
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal para editar obra -->
+        <div class="modal fade" id="editarObraModal{{ obra.id_obra }}" tabindex="-1"
+            aria-labelledby="editarObraModalLabel{{ obra.id_obra }}" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="editarObraModalLabel{{ obra.id_obra }}">Editar Obra</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <form method="POST" action="{% url 'editar_obra' obra.id_obra %}" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        <div class="modal-body">
+                            <div class="mb-3">
+                                <label for="tituloObra{{ obra.id_obra }}" class="form-label">Título</label>
+                                <input type="text" class="form-control" id="tituloObra{{ obra.id_obra }}"
+                                    name="tituloObra" value="{{ obra.tituloObra }}" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="nombreAutorObra{{ obra.id_obra }}" class="form-label">Autor</label>
+                                <input type="text" class="form-control" id="nombreAutorObra{{ obra.id_obra }}"
+                                    name="nombreAutorObra" value="{{ obra.nombreAutorObra }}" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="propietarioObra{{ obra.id_obra }}" class="form-label">Propietario</label>
+                                <input type="text" class="form-control" id="propietarioObra{{ obra.id_obra }}"
+                                    name="propietarioObra" value="{{ obra.propietarioObra }}" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="numeroPaginas{{ obra.id_obra }}" class="form-label">Número de Páginas</label>
+                                <input type="number" class="form-control" id="numeroPaginas{{ obra.id_obra }}"
+                                    name="numeroPaginas" value="{{ obra.numeroPaginas }}" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="tirada{{ obra.id_obra }}" class="form-label">Tirada</label>
+                                <input type="number" class="form-control" id="tirada{{ obra.id_obra }}" name="tirada"
+                                    value="{{ obra.tirada }}" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="portada{{ obra.id_obra }}" class="form-label">Portada</label>
+                                <input type="file" class="form-control" id="portada{{ obra.id_obra }}" name="portada"
+                                    accept=".png, .jpg, .jpeg">
+                            </div>
+                            <div class="mb-3">
+                                <label for="id_material{{ obra.id_obra }}" class="form-label">Material</label>
+                                <select class="form-select" id="id_material{{ obra.id_obra }}" name="id_material"
+                                    required>
+                                    {% for material in materiales %}
+                                    <option value="{{ material.id_material }}"
+                                        {% if material.id_material == obra.id_material.id_material %}selected{% endif %}>
+                                        {{ material.nombreMaterial }}
+                                    </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label for="id_maquinaria{{ obra.id_obra }}" class="form-label">Maquinaria</label>
+                                <select class="form-select" id="id_maquinaria{{ obra.id_obra }}" name="id_maquinaria"
+                                    required>
+                                    {% for maquinaria in maquinarias %}
+                                    <option value="{{ maquinaria.id_maquinaria }}"
+                                        {% if maquinaria.id_maquinaria == obra.id_maquinaria.id_maquinaria %}selected{% endif %}>
+                                        {{ maquinaria.nombreMaquinaria }}
+                                    </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                            <button type="submit" class="btn btn-primary">Guardar Cambios</button>
+                        </div>
                     </form>
-                </td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
 </div>
+
+<!-- Modal para zoom de portada -->
+{% for obra in obras %}
+<div class="modal fade" id="zoomPortadaModal{{ obra.id_obra }}" tabindex="-1"
+    aria-labelledby="zoomPortadaModalLabel{{ obra.id_obra }}" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-body text-center">
+                <img src="{{ obra.portada.url }}" alt="Portada de {{ obra.tituloObra }}" class="img-fluid">
+            </div>
+        </div>
+    </div>
+</div>
+{% endfor %}
 
 <!-- Modal para agregar nueva obra -->
 <div class="modal fade" id="nuevaObraModal" tabindex="-1" aria-labelledby="nuevaObraModalLabel" aria-hidden="true">
@@ -84,7 +170,8 @@ Obras
                     </div>
                     <div class="mb-3">
                         <label for="portada" class="form-label">Portada</label>
-                        <input type="file" class="form-control" id="portada" name="portada" accept="image/*" required>
+                        <input type="file" class="form-control" id="portada" name="portada" accept=".png, .jpg, .jpeg"
+                            required>
                     </div>
                     <div class="mb-3">
                         <label for="id_material" class="form-label">Material</label>
