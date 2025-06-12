@@ -295,25 +295,6 @@ def eliminar_maquinaria(request, id_maquinaria):
         maq.delete()
     return redirect('maquinaria')
 
-
-def login_empleado(request):
-    if request.method == 'POST':
-        correo = request.POST.get('correo')
-        password = request.POST.get('password')
-        try:
-            empleado = Empleado.objects.get(correo=correo)
-            if check_password(password, empleado.clave):
-                # Guardar datos en sesión
-                request.session['usuario_tipo'] = 'empleado'
-                request.session['usuario_id'] = empleado.id_empleado
-                request.session['usuario_nombre'] = empleado.nombreEmpleado
-                return redirect('maquinaria')  # O la página principal para empleados
-            else:
-                return render(request, 'login_empleado.html', {'error': 'Correo o contraseña incorrectos'})
-        except Empleado.DoesNotExist:
-            return render(request, 'login_empleado.html', {'error': 'Correo o contraseña incorrectos'})
-    return render(request, 'login_empleado.html')
-
 def logout(request):
     # Eliminar la sesión del usuario
     request.session.flush()
