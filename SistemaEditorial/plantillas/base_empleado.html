@@ -27,19 +27,19 @@
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ms-auto">
-                    {% if usuario_tipo == 'cliente' %}
+                    {% if usuario_tipo == 'empleado' %}
                     <li class="nav-item">
                         <a class="nav-link text-light" href="{% url 'materiales' %}">Materiales</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link text-light" href="{% url 'estimaciones_cliente' %}">Maquinaria</a>
+                        <a class="nav-link text-light" href="{% url 'maquinaria' %}">Maquinaria</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link text-light" href="#" onclick="confirmLogout()">Cerrar Sesión</a>
                     </li>
                     {% else %}
                     <li class="nav-item">
-                        <a class="nav-link text-light" href="{% url 'login' %}">Iniciar Sesión</a>
+                        <a class="nav-link text-light" href="{% url 'login_empleado' %}">Iniciar Sesión</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link text-light" href="{% url 'registro_empleado' %}">Registrarse</a>

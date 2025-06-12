@@ -27,17 +27,6 @@ def login(request):
         except Cliente.DoesNotExist:
             pass
 
-        # Intentar autenticar como empleado
-        try:
-            empleado = Empleado.objects.get(correo=correo)
-            if check_password(password, empleado.clave):
-                # Guardar sesión del empleado
-                request.session['usuario_tipo'] = 'empleado'
-                request.session['usuario_id'] = empleado.id_empleado
-                return redirect('materiales/')  # Redirigir a lista de materiales
-        except Empleado.DoesNotExist:
-            pass
-
         # Si no se encuentra el usuario
         return render(request, 'login.html', {'error': 'Correo o contraseña incorrectos'})
 
@@ -79,8 +68,8 @@ def registro(request):
 
 def registro_empleado(request):
     if request.method == 'POST':
-        nombre = request.POST['nombre']
-        correo = request.POST['correo']
+        nombre = request.POST['username']
+        correo = request.POST['email']
         password1 = request.POST['password1']
         password2 = request.POST['password2']
 
@@ -110,6 +99,26 @@ def registro_empleado(request):
 
     return render(request, 'registro_empleado.html')
 
+def login_empleado(request):
+    if request.method == 'POST':
+        nombre = request.POST['nombre']
+        password = request.POST['password']
+
+        # Intentar autenticar como empleado
+        try:
+            empleado = Empleado.objects.get(nombreEmpleado=nombre)
+            if check_password(password, empleado.clave):
+                # Guardar sesión del empleado
+                request.session['usuario_tipo'] = 'empleado'
+                request.session['usuario_id'] = empleado.id_empleado
+                return redirect('materiales')  # Redirigir a la lista de materiales
+        except Empleado.DoesNotExist:
+            pass
+
+        # Si no se encuentra el empleado
+        return render(request, 'login_empleado.html', {'error': 'Nombre o contraseña incorrectos'})
+
+    return render(request, 'login_empleado.html')
 
 def estimaciones_cliente(request):
     if request.session.get('usuario_tipo') == 'cliente':
@@ -129,12 +138,18 @@ def estimaciones_cliente(request):
 # Vista para mostrar la lista de materiales y tipos de material
 
 def materiales(request):
-    materiales = Material.objects.all()
-    tipos_material = TipoMaterial.objects.all()
-    return render(request, 'materiales.html', {
-        'materiales': materiales,
-        'tipos_material': tipos_material
-    })
+    if request.session.get('usuario_tipo') == 'empleado':  # Verificar si el usuario es un empleado
+        materiales = Material.objects.all()
+        tipos_material = TipoMaterial.objects.all()
+        return render(request, 'materiales.html', {
+            'materiales': materiales,
+            'tipos_material': tipos_material,
+            'usuario_tipo': 'empleado'  # Pasar el estado de la sesión al contexto
+        })
+    else:
+        return render(request, 'login_empleado.html', {
+            'error': 'Debes iniciar sesión como empleado para acceder a esta página.'
+        })
 
 # Vista para agregar un nuevo material
 
@@ -255,12 +270,18 @@ def eliminar_obra(request, id_obra):
 
 
 def maquinaria(request):
-    maquinarias = Maquinaria.objects.all()
-    tipos_maquinaria = TipoMaquinaria.objects.all()
-    return render(request, 'maquinaria.html', {
-        'maquinarias': maquinarias,
-        'tipos_maquinaria': tipos_maquinaria
-    })
+    if request.session.get('usuario_tipo') == 'empleado':  # Verificar si el usuario es un empleado
+        maquinarias = Maquinaria.objects.all()
+        tipos_maquinaria = TipoMaquinaria.objects.all()
+        return render(request, 'maquinaria.html', {
+            'maquinarias': maquinarias,
+            'tipos_maquinaria': tipos_maquinaria,
+            'usuario_tipo': 'empleado'  # Pasar el estado de la sesión al contexto
+        })
+    else:
+        return render(request, 'login_empleado.html', {
+            'error': 'Debes iniciar sesión como empleado para acceder a esta página.'
+        })
 
 def agregar_maquinaria(request):
     if request.method == 'POST':
