@@ -29,6 +29,7 @@ urlpatterns = [
     path('materiales/agregar/', views.agregar_material, name='agregar_material'),
     path('materiales/editar/<int:id_material>/', views.editar_material, name='editar_material'),
     path('materiales/eliminar/<int:id_material>/', views.eliminar_material, name='eliminar_material'),
+    path('materiales/tipo/agregar/', views.agregar_tipo_material, name='agregar_tipo_material'),
     path('logout/', views.logout, name='logout'),
     path('obras/', views.obras, name='obras'),
     path('obras/agregar/', views.agregar_obra, name='agregar_obra'),
@@ -39,6 +40,7 @@ urlpatterns = [
     path('maquinaria/agregar/', views.agregar_maquinaria, name='agregar_maquinaria'),
     path('maquinaria/editar/<int:id_maquinaria>/', views.editar_maquinaria, name='editar_maquinaria'),
     path('maquinaria/eliminar/<int:id_maquinaria>/', views.eliminar_maquinaria, name='eliminar_maquinaria'),
+    path('maquinaria/tipo/agregar/', views.agregar_tipo_maquinaria, name='agregar_tipo_maquinaria'),
     path('login_empleado/', views.login_empleado, name='login_empleado'),
 ]
 

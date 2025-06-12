@@ -42,6 +42,7 @@ class Obra(models.Model):
 # Modelo para Material
 class Material(models.Model):
     id_material = models.AutoField(primary_key=True)
+    id_tipoMaterial = models.ForeignKey('TipoMaterial', on_delete=models.CASCADE)  # Relación con TipoMaterial
     nombreMaterial = models.CharField(max_length=50)
     descripcion = models.TextField(max_length=500)
     costoUnitarioMaterial = models.DecimalField(max_digits=10, decimal_places=2)

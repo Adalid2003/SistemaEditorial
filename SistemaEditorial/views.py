@@ -155,19 +155,22 @@ def materiales(request):
 
 def agregar_material(request):
     if request.method == 'POST':
-        tipo_id = request.POST.get('id_tipomaterial')
+        tipo_id = request.POST.get('id_tipoMaterial')  # Usa el nombre correcto del campo
         nombre = request.POST.get('nombre')
         descripcion = request.POST.get('descripcion')
         costo_unitario = request.POST.get('costo_unitario')
         unidad_medida = request.POST.get('unidad_medida')
-        tipo = TipoMaterial.objects.get(id_tipomaterial=tipo_id)
-        Material.objects.create(
-            id_tipomaterial=tipo,
-            nombre=nombre,
-            descripcion=descripcion,
-            costo_unitario=costo_unitario,
-            unidad_medida=unidad_medida
-        )
+        try:
+            tipo = TipoMaterial.objects.get(id_tipoMaterial=tipo_id)  # Usa el nombre correcto del campo
+            Material.objects.create(
+                nombreMaterial=nombre,
+                descripcion=descripcion,
+                costoUnitarioMaterial=costo_unitario,
+                unidadMedidaMaterial=unidad_medida
+            )
+        except TipoMaterial.DoesNotExist:
+            print("El TipoMaterial con ID", tipo_id, "no existe.")  # Depuración
+            return redirect('materiales')  # O muestra un mensaje de error
     return redirect('materiales')
 
 # Vista para editar un material existente
@@ -193,6 +196,17 @@ def eliminar_material(request, id_material):
         material = Material.objects.get(id_material=id_material)
         material.delete()
     return redirect('materiales')
+
+def agregar_tipo_material(request):
+    if request.session.get('usuario_tipo') == 'empleado':  # Verificar si el usuario es un empleado
+        if request.method == 'POST':
+            tipo_material = request.POST.get('tipoMaterial')  # Asegúrate de que el nombre coincida con el campo del modelo
+            TipoMaterial.objects.create(tipoMaterial=tipo_material)  # Usa el nombre correcto del campo
+        return redirect('materiales')
+    else:
+        return render(request, 'login_empleado.html', {
+            'error': 'Debes iniciar sesión como empleado para acceder a esta página.'
+        })
 
 def obras(request):
     if request.session.get('usuario_tipo') == 'cliente':
@@ -297,6 +311,17 @@ def agregar_maquinaria(request):
             consumoEnergiaKw=consumo
         )
     return redirect('maquinaria')
+
+def agregar_tipo_maquinaria(request):
+    if request.session.get('usuario_tipo') == 'empleado':  # Verificar si el usuario es un empleado
+        if request.method == 'POST':
+            tipo_maquinaria = request.POST.get('tipoMaquinaria')
+            TipoMaquinaria.objects.create(tipoMaquinaria=tipo_maquinaria)
+        return redirect('maquinaria')
+    else:
+        return render(request, 'login_empleado.html', {
+            'error': 'Debes iniciar sesión como empleado para acceder a esta página.'
+        })
 
 def editar_maquinaria(request, id_maquinaria):
     maq = Maquinaria.objects.get(id_maquinaria=id_maquinaria)
