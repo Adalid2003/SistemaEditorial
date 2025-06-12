@@ -4,6 +4,7 @@ from django.core.exceptions import ValidationError
 from django.core.validators import validate_email
 from django.contrib.auth.decorators import login_required
 import os
+from decimal import Decimal
 from core.models import Cliente, Empleado, CostoEstimacion, Material, TipoMaterial, Maquinaria, TipoMaquinaria, Obra, Estado
 
 def login(request):
@@ -337,18 +338,12 @@ def estimar_obra(request, id_obra):
 
     if request.method == 'POST':
         # Obtener los valores ingresados por el empleado
-        depreciacion = request.POST.get('depreciacionEquipo')
-        energia = request.POST.get('energiaElectrica')
-        costo_produccion = request.POST.get('costoProduccion')
+        depreciacion = Decimal(request.POST.get('depreciacionEquipo'))
+        energia = Decimal(request.POST.get('energiaElectrica'))
+        costo_produccion = Decimal(request.POST.get('costoProduccion'))
 
         # Validar que los valores sean positivos
-        if not depreciacion or not energia or not costo_produccion:
-            return render(request, 'estimar_obra.html', {
-                'obra': obra,
-                'error': 'Todos los campos son obligatorios.'
-            })
-
-        if float(depreciacion) <= 0 or float(energia) <= 0 or float(costo_produccion) <= 0:
+        if depreciacion <= 0 or energia <= 0 or costo_produccion <= 0:
             return render(request, 'estimar_obra.html', {
                 'obra': obra,
                 'error': 'Los valores deben ser positivos.'
@@ -375,7 +370,6 @@ def estimar_obra(request, id_obra):
         return redirect('obras_empleado')
 
     return render(request, 'estimar_obra.html', {'obra': obra})
-
 def obras_empleado(request):
     if request.session.get('usuario_tipo') != 'empleado':  # Verificar si el usuario es empleado
         return redirect('login_empleado')

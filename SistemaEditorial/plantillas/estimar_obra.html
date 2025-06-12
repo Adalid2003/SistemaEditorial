@@ -1,0 +1,30 @@
+{% extends 'base_empleado.html' %}
+
+{% block title %}
+Sistema Editorial | Estimar Obra
+{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <h1 class="text-center mb-4">Estimar Costo de Obra</h1>
+    <form method="POST">
+        {% csrf_token %}
+        <div class="mb-3">
+            <label for="depreciacionEquipo" class="form-label">Depreciación del Equipo</label>
+            <input type="number" step="0.01" class="form-control" id="depreciacionEquipo" name="depreciacionEquipo" required>
+        </div>
+        <div class="mb-3">
+            <label for="energiaElectrica" class="form-label">Energía Eléctrica</label>
+            <input type="number" step="0.01" class="form-control" id="energiaElectrica" name="energiaElectrica" required>
+        </div>
+        <div class="mb-3">
+            <label for="costoProduccion" class="form-label">Costo de Producción</label>
+            <input type="number" step="0.01" class="form-control" id="costoProduccion" name="costoProduccion" required>
+        </div>
+        <button type="submit" class="btn btn-primary">Calcular Estimación</button>
+    </form>
+    {% if error %}
+    <div class="alert alert-danger mt-3">{{ error }}</div>
+    {% endif %}
+</div>
+{% endblock %}

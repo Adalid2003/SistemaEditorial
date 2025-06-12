@@ -1,4 +1,5 @@
 from django.db import models
+from decimal import Decimal
 
 # Modelo para Cliente
 class Cliente(models.Model):
@@ -107,19 +108,19 @@ class CostoEstimacion(models.Model):
 
     def calcular_estimacion(self):
         # Factores de estimación
-        derechos_autor = self.id_obra.numeroPaginas * 0.05  # Ejemplo: 5% por página
-        costos_administrativos = 1000  # Ejemplo: costo fijo
-        costo_material = self.id_obra.id_material.costoUnitarioMaterial * self.id_obra.tirada
-        costo_maquinaria = self.id_obra.id_maquinaria.consumoEnergiaKw * self.energiaElectrica
+        derechos_autor = Decimal(self.id_obra.numeroPaginas) * Decimal('0.05')  # Ejemplo: 5% por página
+        costos_administrativos = Decimal('1000')  # Ejemplo: costo fijo
+        costo_material = Decimal(self.id_obra.id_material.costoUnitarioMaterial) * Decimal(self.id_obra.tirada)
+        costo_maquinaria = Decimal(self.id_obra.id_maquinaria.consumoEnergiaKw) * Decimal(self.energiaElectrica)
 
         # Cálculo del costo total
         self.totalEstimado = (
-            self.depreciacionEquipo +
+            Decimal(self.depreciacionEquipo) +
             costo_material +
             costo_maquinaria +
             derechos_autor +
             costos_administrativos +
-            self.costoProduccion
+            Decimal(self.costoProduccion)
         )
         return self.totalEstimado
 

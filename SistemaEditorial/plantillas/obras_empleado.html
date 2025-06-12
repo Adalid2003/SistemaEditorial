@@ -24,8 +24,7 @@ Sistema Editorial | Obras
                     </p>
                     <div class="d-flex justify-content-between">
                         {% if obra.id_estado.nombreEstado == 'espera' %}
-                        <form method="POST" action="{% url 'estimar_obra' obra.id_obra %}">
-                            {% csrf_token %}
+                        <form method="GET" action="{% url 'estimar_obra' obra.id_obra %}">
                             <button type="submit" class="btn btn-success btn-sm">
                                 <i class="bi bi-check-circle"></i> Estimar
                             </button>
