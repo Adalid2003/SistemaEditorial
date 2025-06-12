@@ -21,9 +21,16 @@ class Empleado(models.Model):
     def __str__(self):
         return self.nombreEmpleado
 
+class Estado(models.Model):
+    id_estado = models.AutoField(primary_key=True)
+    nombreEstado = models.CharField(max_length=50, unique=True)  # Ejemplo: "espera", "estimada", etc.
+
+    def __str__(self):
+        return self.nombreEstado
 
 # Modelo para Obra
 class Obra(models.Model):
+    id_obra = models.AutoField(primary_key=True)  # Clave primaria explícita
     tituloObra = models.CharField(max_length=255)
     nombreAutorObra = models.CharField(max_length=255)
     propietarioObra = models.CharField(max_length=255)
@@ -33,7 +40,7 @@ class Obra(models.Model):
     id_material = models.ForeignKey('Material', on_delete=models.CASCADE)
     id_maquinaria = models.ForeignKey('Maquinaria', on_delete=models.CASCADE)
     id_cliente = models.ForeignKey('Cliente', on_delete=models.CASCADE)
-    id_estado = models.ForeignKey('Estado', on_delete=models.CASCADE, default=1)  # Relación con Estado
+    id_estado = models.ForeignKey('Estado', on_delete=models.CASCADE)
 
     def calcular_estimacion(self):
         # Lógica para calcular la estimación
@@ -120,9 +127,5 @@ class CostoEstimacion(models.Model):
     def __str__(self):
         return f"Estimación {self.id_costoEstimacion} - Obra {self.id_obra}"
     
-class Estado(models.Model):
-    nombreEstado = models.CharField(max_length=50, unique=True)  # Ejemplo: "espera", "estimada", etc.
 
-    def __str__(self):
-        return self.nombreEstado
 # Create your models here.
