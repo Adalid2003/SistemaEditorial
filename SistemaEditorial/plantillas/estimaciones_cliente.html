@@ -7,109 +7,26 @@ Estimaciones del Cliente
 {% block content %}
 <h1 class="text-center mb-4">Estimaciones Realizadas</h1>
 
-<!-- Tabla de estimaciones -->
-<table class="table table-bordered table-hover">
-    <thead class="table-dark">
-        <tr>
-            <th>ID Estimación</th>
-            <th>Obra</th>
-            <th>Portada</th>
-            <th>Depreciación Equipo</th>
-            <th>Energía Eléctrica</th>
-            <th>Costo Producción</th>
-            <th>Tirada</th>
-            <th>Total Estimado</th>
-        </tr>
-    </thead>
-    <tbody>
+<div class="container mt-5">
+    <h1 class="text-center mb-4">Estimaciones de Costo</h1>
+    <div class="row">
         {% for estimacion in estimaciones %}
-        <tr>
-            <td>{{ estimacion.id_costoEstimacion }}</td>
-            <td>{{ estimacion.id_obra.tituloObra }}</td>
-            <td>
-                <img src="{{ estimacion.id_obra.portada.url }}" alt="Portada" width="100" height="150">
-            </td>
-            <td>${{ estimacion.depreciacionEquipo }}</td>
-            <td>${{ estimacion.energiaElectrica }}</td>
-            <td>${{ estimacion.costoProduccion }}</td>
-            <td>{{ estimacion.tirada }}</td>
-            <td>${{ estimacion.totalEstimado }}</td>
-        </tr>
-        {% endfor %}
-    </tbody>
-</table>
-
-<!-- Botón para agregar nueva estimación -->
-<button type="button" class="btn btn-primary mt-4" data-bs-toggle="modal" data-bs-target="#nuevaEstimacionModal">
-    Agregar Nueva Estimación
-</button>
-
-<!-- Modal para nueva estimación -->
-<div class="modal fade" id="nuevaEstimacionModal" tabindex="-1" aria-labelledby="nuevaEstimacionModalLabel"
-    aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="nuevaEstimacionModalLabel">Nueva Estimación</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        <div class="col-md-6 mb-4">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Obra: {{ estimacion.id_obra.tituloObra }}</h5>
+                    <p class="card-text">
+                        <strong>Autor:</strong> {{ estimacion.id_obra.nombreAutorObra }}<br>
+                        <strong>Propietario:</strong> {{ estimacion.id_obra.propietarioObra }}<br>
+                        <strong>Número de Páginas:</strong> {{ estimacion.id_obra.numeroPaginas }}<br>
+                        <strong>Tirada:</strong> {{ estimacion.id_obra.tirada }}<br>
+                        <strong>Estado:</strong> {{ estimacion.id_obra.id_estado.nombreEstado }}<br>
+                        <strong>Total Estimado:</strong> ${{ estimacion.totalEstimado }}
+                    </p>
+                </div>
             </div>
-            <form method="POST" action="{% url 'estimaciones_cliente' %}" enctype="multipart/form-data">
-                {% csrf_token %}
-                <div class="modal-body">
-                    <!-- Campo: Título de la Obra -->
-                    <div class="mb-3">
-                        <label for="tituloObra" class="form-label">Título de la Obra</label>
-                        <input type="text" class="form-control" id="tituloObra" name="tituloObra" required>
-                    </div>
-
-                    <!-- Campo: Número de Páginas -->
-                    <div class="mb-3">
-                        <label for="numeroPaginas" class="form-label">Número de Páginas</label>
-                        <input type="number" class="form-control" id="numeroPaginas" name="numeroPaginas" required>
-                    </div>
-
-                    <!-- Campo: Tirada -->
-                    <div class="mb-3">
-                        <label for="tirada" class="form-label">Tirada</label>
-                        <input type="number" class="form-control" id="tirada" name="tirada" required>
-                    </div>
-
-                    <!-- Campo: Portada -->
-                    <div class="mb-3">
-                        <label for="portada" class="form-label">Portada</label>
-                        <input type="file" class="form-control" id="portada" name="portada" accept="image/*" required>
-                    </div>
-
-                    <!-- Campo: Depreciación Equipo -->
-                    <div class="mb-3">
-                        <label for="depreciacionEquipo" class="form-label">Depreciación Equipo</label>
-                        <input type="number" class="form-control" id="depreciacionEquipo" name="depreciacionEquipo" step="0.01" required>
-                    </div>
-
-                    <!-- Campo: Energía Eléctrica -->
-                    <div class="mb-3">
-                        <label for="energiaElectrica" class="form-label">Energía Eléctrica</label>
-                        <input type="number" class="form-control" id="energiaElectrica" name="energiaElectrica" step="0.01" required>
-                    </div>
-
-                    <!-- Campo: Costo Producción -->
-                    <div class="mb-3">
-                        <label for="costoProduccion" class="form-label">Costo Producción</label>
-                        <input type="number" class="form-control" id="costoProduccion" name="costoProduccion" step="0.01" required>
-                    </div>
-
-                    <!-- Campo: Total Estimado -->
-                    <div class="mb-3">
-                        <label for="totalEstimado" class="form-label">Total Estimado</label>
-                        <input type="number" class="form-control" id="totalEstimado" name="totalEstimado" step="0.01" required>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="submit" class="btn btn-primary">Guardar</button>
-                </div>
-            </form>
         </div>
+        {% endfor %}
     </div>
 </div>
 {% endblock %}

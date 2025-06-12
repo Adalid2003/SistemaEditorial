@@ -122,19 +122,17 @@ def login_empleado(request):
     return render(request, 'login_empleado.html')
 
 def estimaciones_cliente(request):
-    if request.session.get('usuario_tipo') == 'cliente':
+    if request.session.get('usuario_tipo') == 'cliente':  # Verificar si el usuario es cliente
         cliente_id = request.session.get('usuario_id')
         cliente = Cliente.objects.get(id_cliente=cliente_id)
-        estimaciones = CostoEstimacion.objects.filter(id_obra__id_cliente=cliente)
+        estimaciones = CostoEstimacion.objects.filter(id_obra__id_cliente=cliente)  # Filtrar estimaciones del cliente
+
         return render(request, 'estimaciones_cliente.html', {
             'estimaciones': estimaciones,
             'usuario_tipo': 'cliente'  # Pasar el estado de la sesión al contexto
         })
     else:
-        return render(request, 'login.html', {
-            'error': 'Debes iniciar sesión como cliente para acceder a esta página.'
-        })
-
+        return redirect('login')  # Redirigir al login si no está autenticado como cliente
 # CRUD de Materiales
 # Vista para mostrar la lista de materiales y tipos de material
 
@@ -328,22 +326,55 @@ def eliminar_obra(request, id_obra):
     obra.delete()
     return redirect('obras')
 
+from django.shortcuts import render, redirect, get_object_or_404
+from core.models import Obra, CostoEstimacion, Estado, Empleado
+
 def estimar_obra(request, id_obra):
     if request.session.get('usuario_tipo') != 'empleado':  # Verificar si el usuario es empleado
         return redirect('login_empleado')
 
-    try:
-        obra = Obra.objects.get(id_obra=id_obra)
-        estimacion = obra.calcular_estimacion()  # Ejecutar el método de estimación
-        CostoEstimacion.objects.create(
+    obra = get_object_or_404(Obra, id_obra=id_obra)
+
+    if request.method == 'POST':
+        # Obtener los valores ingresados por el empleado
+        depreciacion = request.POST.get('depreciacionEquipo')
+        energia = request.POST.get('energiaElectrica')
+        costo_produccion = request.POST.get('costoProduccion')
+
+        # Validar que los valores sean positivos
+        if not depreciacion or not energia or not costo_produccion:
+            return render(request, 'estimar_obra.html', {
+                'obra': obra,
+                'error': 'Todos los campos son obligatorios.'
+            })
+
+        if float(depreciacion) <= 0 or float(energia) <= 0 or float(costo_produccion) <= 0:
+            return render(request, 'estimar_obra.html', {
+                'obra': obra,
+                'error': 'Los valores deben ser positivos.'
+            })
+
+        # Obtener el empleado actual
+        empleado = Empleado.objects.get(id_empleado=request.session.get('usuario_id'))
+
+        # Crear la estimación
+        costo_estimacion = CostoEstimacion(
             id_obra=obra,
-            costo_estimado=estimacion
+            id_empleado=empleado,
+            depreciacionEquipo=depreciacion,
+            energiaElectrica=energia,
+            costoProduccion=costo_produccion
         )
-        obra.id_estado = Estado.objects.get(nombreEstado='estimada')  # Cambiar el estado de la obra
+        costo_estimacion.calcular_estimacion()
+        costo_estimacion.save()
+
+        # Cambiar el estado de la obra a "estimada"
+        obra.id_estado = Estado.objects.get(nombreEstado='estimada')
         obra.save()
+
         return redirect('obras_empleado')
-    except Obra.DoesNotExist:
-        return redirect('obras_empleado')  # Redirigir si la obra no existe
+
+    return render(request, 'estimar_obra.html', {'obra': obra})
 
 def obras_empleado(request):
     if request.session.get('usuario_tipo') != 'empleado':  # Verificar si el usuario es empleado
