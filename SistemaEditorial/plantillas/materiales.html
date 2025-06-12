@@ -27,7 +27,7 @@ Sistema Editorial | Materiales
             {% for material in materiales %}
             <tr>
                 <td>{{ material.id_material }}</td>
-                <td>{{ material.id_tipomaterial.nombre_tipo }}</td>
+                <td>{{ material.id_tipoMaterial.tipoMaterial }}</td>
                 <td>{{ material.nombreMaterial }}</td>
                 <td>{{ material.descripcion }}</td>
                 <td>${{ material.costoUnitarioMaterial }}</td>
@@ -70,7 +70,7 @@ Sistema Editorial | Materiales
                                         {% for tipo in tipos_material %}
                                         <option value="{{ tipo.id_tipomaterial }}" {% if
                                             tipo.id_tipomaterial==material.id_tipomaterial.id_tipomaterial %}selected{%
-                                            endif %}>{{ tipo.nombre_tipo }}</option>
+                                            endif %}>{{ tipo.tipoMaterial }}</option>
                                         {% endfor %}
                                     </select>
                                 </div>

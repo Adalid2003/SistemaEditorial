@@ -156,6 +156,7 @@ def materiales(request):
 def agregar_material(request):
     if request.method == 'POST':
         tipo_id = request.POST.get('id_tipoMaterial')  # Usa el nombre correcto del campo
+        print("ID Tipo Material recibido:", tipo_id)  # Depuración
         nombre = request.POST.get('nombre')
         descripcion = request.POST.get('descripcion')
         costo_unitario = request.POST.get('costo_unitario')
@@ -163,6 +164,7 @@ def agregar_material(request):
         try:
             tipo = TipoMaterial.objects.get(id_tipoMaterial=tipo_id)  # Usa el nombre correcto del campo
             Material.objects.create(
+                id_tipoMaterial=tipo,
                 nombreMaterial=nombre,
                 descripcion=descripcion,
                 costoUnitarioMaterial=costo_unitario,
