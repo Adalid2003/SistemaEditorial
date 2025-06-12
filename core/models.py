@@ -103,14 +103,13 @@ class CostoEstimacion(models.Model):
     depreciacionEquipo = models.DecimalField(max_digits=10, decimal_places=2)
     energiaElectrica = models.DecimalField(max_digits=10, decimal_places=2)
     costoProduccion = models.DecimalField(max_digits=10, decimal_places=2)
-    tirada = models.IntegerField()
     totalEstimado = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
 
     def calcular_estimacion(self):
         # Factores de estimación
         derechos_autor = self.id_obra.numeroPaginas * 0.05  # Ejemplo: 5% por página
         costos_administrativos = 1000  # Ejemplo: costo fijo
-        costo_material = self.id_obra.id_material.costoUnitarioMaterial * self.tirada
+        costo_material = self.id_obra.id_material.costoUnitarioMaterial * self.id_obra.tirada
         costo_maquinaria = self.id_obra.id_maquinaria.consumoEnergiaKw * self.energiaElectrica
 
         # Cálculo del costo total
