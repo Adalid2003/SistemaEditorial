@@ -308,13 +308,17 @@ def editar_obra(request, id_obra):
             obra.portada = request.FILES.get('portada')
         obra.id_material = Material.objects.get(id_material=request.POST.get('id_material'))
         obra.id_maquinaria = Maquinaria.objects.get(id_maquinaria=request.POST.get('id_maquinaria'))
-        obra.id_estado = Estado.objects.get(id_estado=request.POST.get('id_estado'))  # Actualizar estado
+
+        # Cambiar automáticamente el estado a "espera"
+        estado_espera = Estado.objects.get(nombreEstado='espera')
+        obra.id_estado = estado_espera
+
         obra.save()
         return redirect('obras')
     materiales = Material.objects.all()
     maquinarias = Maquinaria.objects.all()
-    estados = Estado.objects.all()  # Obtener todos los estados
-    return render(request, 'editar_obra.html', {
+    estados = Estado.objects.all()
+    return render(request, 'obras.html', {
         'obra': obra,
         'materiales': materiales,
         'maquinarias': maquinarias,
@@ -370,6 +374,7 @@ def estimar_obra(request, id_obra):
         return redirect('obras_empleado')
 
     return render(request, 'estimar_obra.html', {'obra': obra})
+
 def obras_empleado(request):
     if request.session.get('usuario_tipo') != 'empleado':  # Verificar si el usuario es empleado
         return redirect('login_empleado')
