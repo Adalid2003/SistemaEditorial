@@ -180,15 +180,23 @@ def agregar_material(request):
 def editar_material(request, id_material):
     material = Material.objects.get(id_material=id_material)
     if request.method == 'POST':
-        tipo_id = request.POST.get('id_tipomaterial')
-        material.id_tipomaterial = TipoMaterial.objects.get(id_tipomaterial=tipo_id)
-        material.nombre = request.POST.get('nombre')
+        tipo_id = request.POST.get('id_tipoMaterial')  # Usa el nombre correcto del campo
+        print("ID Tipo Material recibido:", tipo_id)  # Depuración
+        try:
+            material.id_tipoMaterial = TipoMaterial.objects.get(id_tipoMaterial=tipo_id)  # Usa el nombre correcto del campo
+        except TipoMaterial.DoesNotExist:
+            print(f"TipoMaterial con ID {tipo_id} no existe.")  # Depuración
+            return render(request, 'materiales.html', {
+                'error': f"El TipoMaterial con ID {tipo_id} no existe.",
+                'materiales': Material.objects.all(),
+                'tipos_material': TipoMaterial.objects.all()
+            })
+        material.nombreMaterial = request.POST.get('nombre')
         material.descripcion = request.POST.get('descripcion')
-        material.costo_unitario = request.POST.get('costo_unitario')
-        material.unidad_medida = request.POST.get('unidad_medida')
+        material.costoUnitarioMaterial = request.POST.get('costo_unitario')
+        material.unidadMedidaMaterial = request.POST.get('unidad_medida')
         material.save()
         return redirect('materiales')
-    # Si quieres permitir edición por GET, puedes retornar el modal aquí
     return redirect('materiales')
 
 # Vista para eliminar un material

@@ -65,19 +65,21 @@ Sistema Editorial | Materiales
                             </div>
                             <div class="modal-body">
                                 <div class="mb-3">
-                                    <label class="form-label">Tipo de Material</label>
-                                    <select class="form-select" name="id_tipomaterial" required>
+                                    <label for="id_tipoMaterial" class="form-label">Tipo de Material</label>
+                                    <select class="form-select" id="id_tipoMaterial" name="id_tipoMaterial" required>
                                         {% for tipo in tipos_material %}
-                                        <option value="{{ tipo.id_tipomaterial }}" {% if
-                                            tipo.id_tipomaterial==material.id_tipomaterial.id_tipomaterial %}selected{%
-                                            endif %}>{{ tipo.tipoMaterial }}</option>
+                                        <option value="{{ tipo.id_tipoMaterial }}" {% if
+                                            tipo.id_tipoMaterial==material.id_tipoMaterial.id_tipoMaterial %}selected{%
+                                            endif %}>
+                                            {{ tipo.tipoMaterial }}
+                                        </option>
                                         {% endfor %}
                                     </select>
                                 </div>
                                 <div class="mb-3">
                                     <label class="form-label">Nombre</label>
-                                    <input type="text" class="form-control" name="nombre" value="{{ material.nombreMaterial}}"
-                                        required>
+                                    <input type="text" class="form-control" name="nombre"
+                                        value="{{ material.nombreMaterial}}" required>
                                 </div>
                                 <div class="mb-3">
                                     <label class="form-label">Descripción</label>
