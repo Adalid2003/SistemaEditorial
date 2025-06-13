@@ -43,13 +43,7 @@ class Obra(models.Model):
     id_cliente = models.ForeignKey('Cliente', on_delete=models.CASCADE)
     id_estado = models.ForeignKey('Estado', on_delete=models.CASCADE)
 
-    def calcular_estimacion(self):
-        # Lógica para calcular la estimación
-        costo_por_pagina = 0.5  # Costo por página
-        costo_por_tirada = 0.1  # Costo por unidad de tirada
-        estimacion = (self.numeroPaginas * costo_por_pagina) + (self.tirada * costo_por_tirada)
-        return estimacion
-
+    
     def __str__(self):
         return self.tituloObra
 
