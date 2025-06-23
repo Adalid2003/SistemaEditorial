@@ -143,11 +143,15 @@ Sistema Editorial | Obras
                     </div>
                     <div class="mb-3">
                         <label for="nombreAutorObra" class="form-label">Autor</label>
-                        <input type="text" class="form-control" id="nombreAutorObra" name="nombreAutorObra" required>
+                        <input type="text" class="form-control" id="nombreAutorObra" name="nombreAutorObra" required pattern="[A-Za-z\s]+" 
+        title="Solo se permiten letras y espacios"
+        oninput="this.value = this.value.replace(/[^A-Za-z\s]/g, '')">
                     </div>
                     <div class="mb-3">
                         <label for="propietarioObra" class="form-label">Propietario</label>
-                        <input type="text" class="form-control" id="propietarioObra" name="propietarioObra" required>
+                        <input type="text" class="form-control" id="propietarioObra" name="propietarioObra" required pattern="[A-Za-z\s]+"
+        title="Solo se permiten letras y espacios"
+        oninput="this.value = this.value.replace(/[^A-Za-z\s]/g, '')">
                     </div>
                     <div class="mb-3">
                         <label for="numeroPaginas" class="form-label">Número de Páginas</label>
